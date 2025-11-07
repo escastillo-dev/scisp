@@ -1,11 +1,11 @@
 # main.py
-import offset
+
 import uvicorn
 from fastapi import FastAPI, Request, Path, APIRouter
 from fastapi.responses import JSONResponse
 from fastapi import Depends, HTTPException, Query
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-
+from fastapi.middleware.cors import CORSMiddleware
 from DAO import ApcDAO, mermaDAO
 from DAO.mermaDAO import get_motivos_merma, get_productos_catalogo, eliminar_producto_detalle, get_productos_merma, \
     get_mermas_by_sucursales, agregar_producto_detalle, crear_merma_cabecera, get_merma_by_id
@@ -44,17 +44,36 @@ app = FastAPI(title="API Manejo de Valores")
 router = APIRouter(tags=["Estadísticas"])
 
 
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=[
+#         "http://localhost:3000",      # Next.js en desarrollo
+#         "http://192.168.137.207:3000",  # Next.js en red local
+#         "http://127.0.0.1:3000",      # Alternativa localhost
+#     ],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# CORS - IMPORTANTE
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",      # Next.js en desarrollo
-        "http://192.168.137.1:3000",  # Next.js en red local
-        "http://127.0.0.1:3000",      # Alternativa localhost
-    ],
+    allow_origins=["*"],  # Por ahora permite todo
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+def read_root():
+    return {"message": "Backend funcionando"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
 @app.exception_handler(Exception)
 async def all_exc_handler(req: Request, exc: Exception):
     # Quita esto en producción; es para ver el error real
